@@ -1,24 +1,48 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	//"net/http"
+	"os"
 
+	//"net/http"
 	"github.com/3XBAT/todo-app_by_yourself"
 	handler "github.com/3XBAT/todo-app_by_yourself/pkg/handlers"
 	"github.com/3XBAT/todo-app_by_yourself/pkg/repository"
 	"github.com/3XBAT/todo-app_by_yourself/pkg/service"
-	//"github.com/sirupsen/logrus"
+	_ "github.com/lib/pq"
+	"github.com/subosito/gotenv"
+
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func main() {
 
-	if err := initConfig(); err != nil{
+	if err := initConfig(); err != nil {
 		log.Fatalf("error initializing config : %s", err.Error())
+	} //почему сначала инициализации конфига а потом все остальное?-чтобы мы могли юзать viper.GetString() при создании экземпляра БД
+
+	logrus.SetFormatter(new(logrus.JSONFormatter))
+
+	if err := gotenv.Load(); err != nil {
+		log.Fatalf("failed loading env variables: %s", err.Error())
 	}
 
-	repos := repository.NewRepository()
+	db, err := repository.NewPostgresDB(repository.Config{ //для того чтобы компилятор увидел функцию NewPostgresDB нужно четко указать это через точку
+		Port:     viper.GetString("db.port"),
+		Host:     viper.GetString("db.host"),
+		Username: viper.GetString("db.name"),
+		DBName:   viper.GetString("db.dbname"),
+		SSLMode:  viper.GetString("db.sslmode"),
+		Password: os.Getenv("DB_PASSWORD"),
+	}) //наша бд инициализируется значениями из конфига, поэтому мы сначала инициализируем без
+
+	if err != nil {
+		log.Fatalf(fmt.Sprintf("failed to initialized db: %s", err.Error()))
+	}
+
+	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handler := handler.NewHandler(services)
 
@@ -31,9 +55,9 @@ func main() {
 
 }
 
-func initConfig() error{
-	viper.AddConfigPath("configs")
-	viper.SetConfigFile("config")
+func initConfig() error {
+	viper.AddConfigPath("CONFIGS") //можно и без неё, нахуй она не нужна впринципе
+	viper.SetConfigFile("config.yaml")
 	return viper.ReadInConfig()
 }
 
