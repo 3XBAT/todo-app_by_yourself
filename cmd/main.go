@@ -36,7 +36,7 @@ func main() {
 		SSLMode:  viper.GetString("db.sslmode"),
 		Password: os.Getenv("DB_PASSWORD"),
 	}) 
-//ввввввввввв
+
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("failed to initialized db: %s", err.Error()))
 	}
@@ -55,7 +55,7 @@ func main() {
 }
 
 func initConfig() error {
-	viper.AddConfigPath("CONFIGS") //можно и без неё, нахуй она не нужна впринципе
+	viper.AddConfigPath("CONFIGS") 
 	viper.SetConfigFile("config.yaml")
 	return viper.ReadInConfig()
 }
