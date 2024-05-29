@@ -36,7 +36,7 @@ func main() {
 		SSLMode:  viper.GetString("db.sslmode"),
 		Password: os.Getenv("DB_PASSWORD"),
 	}) 
-
+//ввввввввввв
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("failed to initialized db: %s", err.Error()))
 	}
