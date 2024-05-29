@@ -8,7 +8,7 @@ import (
 )
 
 type AuthPostgres struct {
-	db *sqlx.DB //дальше некуда
+	db *sqlx.DB 
 }
 
 func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
@@ -28,7 +28,7 @@ func (r *AuthPostgres) CreateUser(user todo.User) (int, error) {
 func (r *AuthPostgres) GetUser(username, password string) (todo.User, error) {
 	var user todo.User
 	query := fmt.Sprintf("SELECT id FROM %s where username=$1 AND password_hash=$2", usersTable)
-	err := r.db.Get(&user,query,username, password)// почему мы тут не делаем провекру на ошибки -- вопрос открытый
+	err := r.db.Get(&user,query,username, password)
 	
 	return user, err
 }

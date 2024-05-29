@@ -15,8 +15,7 @@ type Config struct {
 	SSLMode  string
 }
 
-// возможно потому что создание бд никак не связано с взаимодейсвтием уровней, поэтому внедрять зависимость бессмысленно
-func NewPostgresDB(cfg Config) (*sqlx.DB, error) { // создаём экземпляр прямо в методе. Почему это не противоречит чистой ахитектуре?????
+func NewPostgresDB(cfg Config) (*sqlx.DB, error) { 
 	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode)) //
 
@@ -24,11 +23,11 @@ func NewPostgresDB(cfg Config) (*sqlx.DB, error) { // создаём экзем�
 		return nil, err
 	}
 
-	err = db.Ping() // проверяем можем ли мы подколючится к нашей бд, если нет то кидаем ошибку
+	err = db.Ping() 
 	if err != nil {
 		return nil, err
 	}
 	fmt.Println("все ахуенно")
-	return db, nil //если все ок возвращаем экземпляр нашей бд
+	return db, nil 
 
 }

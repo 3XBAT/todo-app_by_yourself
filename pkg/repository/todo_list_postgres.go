@@ -32,7 +32,7 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 	}
 
 	createUsersListQuery := fmt.Sprintf("INSERT INTO %s (user_id, list_id) VALUES ($1, $2)", usersListsTable)
-	_, err = tx.Exec(createUsersListQuery, userId, id) //здесь стоит просто id потому что мы добавляем users_lists строку которую только что создали, а её айди мы присвоили в id
+	_, err = tx.Exec(createUsersListQuery, userId, id) 
 	if err != nil {
 		tx.Rollback()
 		return 0, nil
@@ -45,10 +45,9 @@ func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 	var lists []todo.TodoList
 
 	query := fmt.Sprintf("SELECT tl.id, tl.title, tl.description FROM %s tl INNER JOIN %s on tl.id = ul.list_id WHERE ul.user_id = $1",
-		todoListsTable, usersListsTable) //выбираем все записи соединённых таблиц todo_lists и users_lists где айди списка айди списка в таблице ul и где где айди юзера мы задаём сами
+		todoListsTable, usersListsTable) 
 	err := r.db.Select(&lists, query, userId)
-	//исопльзуем селект потому что он работает аналагочно с методом GET, только применяется при выборке больше одного элемента
-	//и записывает в слайсы
+
 	return lists, err
 }
 
@@ -56,10 +55,9 @@ func (r *TodoListPostgres) GetById(userId, listId int) (todo.TodoList, error) {
 	var list todo.TodoList
 
 	query := fmt.Sprintf("SELECT tl.id, tl.title, tl.description FROM %s tl INNER JOIN %s on tl.id = ul.list_id WHERE ul.user_id = $1 AND ul.list_id = list_id = $2",
-		todoListsTable, usersListsTable) //выбираем все записи соединённых таблиц todo_lists и users_lists где айди списка айди списка в таблице ul и где где айди юзера мы задаём сами
+		todoListsTable, usersListsTable) 
 	err := r.db.Get(&list, query, userId, listId)
-	//исопльзуем селект потому что он работает аналагочно с методом GET, только применяется при выборке больше одного элемента
-	//и записывает в слайсы
+
 	return list, err
 }
 

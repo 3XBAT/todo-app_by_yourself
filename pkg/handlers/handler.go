@@ -12,7 +12,7 @@ type Handler struct {
 }
 
 func NewHandler(services *service.Service) *Handler {
-	return &Handler{service: services} //почему то у него без & все окей
+	return &Handler{service: services} 
 }
 
 func (h Handler) InitRoutes() *gin.Engine {
@@ -45,7 +45,7 @@ func (h Handler) InitRoutes() *gin.Engine {
 
 		items := api.Group("items")
 		{
-			items.PUT("/:id", h.updateItem) //item_id - id задачи, id- id списка
+			items.PUT("/:id", h.updateItem) 
 			items.GET("/:id", h.getItemById)
 			items.DELETE("/:id", h.deleteItem)
 		}
