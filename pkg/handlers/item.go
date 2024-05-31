@@ -6,11 +6,13 @@ import (
 
 	"github.com/3XBAT/todo-app_by_yourself"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *Handler) createItem(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
+		logrus.Println("error while getting user id",userId)
 		return
 	}
 
@@ -25,6 +27,7 @@ func (h *Handler) createItem(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	logrus.Println("input fields:", input.Title, input.Description, input.Done)
 
 	id, err := h.service.TodoItem.Create(userId, listId, input)
 	if err != nil {
@@ -93,6 +96,7 @@ func (h *Handler) updateItem(c *gin.Context) {
 
 	var input todo.UpdateItemInput
 	if err = c.BindJSON(&input); err != nil {
+		logrus.Errorf("error while binding json ItemInput")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}

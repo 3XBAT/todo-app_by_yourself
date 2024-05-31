@@ -6,9 +6,11 @@ import (
 
 	"github.com/3XBAT/todo-app_by_yourself"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *Handler) createList(c *gin.Context) {
+	logrus.Println("createList is working...")
 	userId, err := getUserId(c)
 	if err != nil {
 		return
@@ -19,13 +21,14 @@ func (h *Handler) createList(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
+	logrus.Println("title-  description-", input.Title, input.Description)
 	id, err := h.service.TodoList.Create(userId, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	logrus.Println("createList is compelted!")
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})

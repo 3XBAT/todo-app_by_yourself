@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
+	//"os"
 
 	//"net/http"
 	"github.com/3XBAT/todo-app_by_yourself"
@@ -11,7 +11,7 @@ import (
 	"github.com/3XBAT/todo-app_by_yourself/pkg/repository"
 	"github.com/3XBAT/todo-app_by_yourself/pkg/service"
 	_ "github.com/lib/pq"
-	"github.com/subosito/gotenv"
+	//"github.com/subosito/gotenv"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -19,22 +19,22 @@ import (
 
 func main() {
 
-	if err := initConfig(); err != nil {
-		log.Fatalf("error initializing config : %s", err.Error())
-	} 
+	// if err := initConfig(); err != nil {
+	// 	log.Fatalf("error initializing config : %s", err.Error())
+	// } 
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	if err := gotenv.Load(); err != nil {
-		log.Fatalf("failed loading env variables: %s", err.Error())
-	}
+	// if err := gotenv.Load(); err != nil {
+	// 	log.Fatalf("failed loading env variables: %s", err.Error())
+	// }
 
 	db, err := repository.NewPostgresDB(repository.Config{ 
-		Port:     viper.GetString("db.port"),
-		Host:     viper.GetString("db.host"),
-		Username: viper.GetString("db.name"),
-		DBName:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-		Password: os.Getenv("DB_PASSWORD"),
+		Port:     "5432",
+		Host:     "localhost",
+		Username: "postgres",
+		DBName:   "postgres",
+		SSLMode:  "disable",
+		Password: "qwerty",
 	}) 
 
 	if err != nil {
@@ -48,7 +48,7 @@ func main() {
 	
 	srv := new(todo.Server)
 
-	if err := srv.Run(viper.GetString("port"), handler.InitRoutes()); err != nil { 
+	if err := srv.Run("8000", handler.InitRoutes()); err != nil { 
 		log.Fatalf("error occured while runing the server %s", err.Error())
 	}
 

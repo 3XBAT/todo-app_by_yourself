@@ -9,12 +9,13 @@ import (
 	"github.com/3XBAT/todo-app_by_yourself"
 	"github.com/3XBAT/todo-app_by_yourself/pkg/repository"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	salt       = "p193urrnv-91jj"
-	signingKey = "[rion[oqin[vornv[o2malfjvbhalkj]dsf]"
-	tokenTTL   = 12 * time.Hour
+	salt      = "p193urrnv-91jj"
+	signinKey = "rionoqinvornvo2malfjvbhalkjdsf"
+	tokenTTL  = 12 * time.Hour
 )
 
 type tokenClaims struct {
@@ -31,33 +32,35 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 }
 
 func (s *AuthService) CreateUser(user todo.User) (int, error) {
-	user.Password = s.generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
 
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
 	user, err := s.repo.GetUser(username, password)
 	if err != nil {
+		logrus.Errorf("err - %s", err.Error())
 		return "", err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, &tokenClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 		user.Id,
 	})
-	return token.SignedString([]byte(signingKey))
+
+	return token.SignedString([]byte(signinKey))
 }
 
+
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
+	
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid singing method")
 		}
-
-		return []byte(signingKey), nil
+		return []byte(signinKey), nil
 	})
 
 	if err != nil {

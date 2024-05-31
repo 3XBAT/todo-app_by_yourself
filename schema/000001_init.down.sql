@@ -1,6 +1,6 @@
 DROP TABLE lists_items;
 
-DROP TABLE users_list; 
+DROP TABLE users_lists; 
 
 DROP TABLE todo_lists; 
 
