@@ -18,22 +18,21 @@ type Authorization interface { //методы репозитория связа�
 	GetUser(username, password string) (todo.User, error)
 }
 
-type TodoList interface {//методы для списков
+type TodoList interface { //методы для списков
 	Create(userId int, list todo.TodoList) (int, error)
 	GetAll(userId int) ([]todo.TodoList, error)
 	GetById(userId, listId int) (todo.TodoList, error)
 	Delete(userId, listId int) error
-	Update(userId, lsitId int, input todo.UpdateListInput) error
+	Update(userId, listId int, input todo.UpdateListInput) error
 }
 
-type TodoItem interface {//методы для самих задач
+type TodoItem interface { //методы для самих задач
 	Create(listId int, item todo.TodoItem) (int, error)
 	GetAll(userId, listId int) ([]todo.TodoItem, error)
 	GetById(userId, itemId int) (todo.TodoItem, error)
 	Delete(userId, itemId int) error
 	Update(userId, itemId int, input todo.UpdateItemInput) error
 }
-
 
 type Repository struct {
 	Authorization

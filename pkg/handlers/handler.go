@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/3XBAT/todo-app_by_yourself/pkg/clients/auth/grpc"
 	_ "net/http"
 
 	"github.com/3XBAT/todo-app_by_yourself/pkg/service"
@@ -8,11 +9,15 @@ import (
 )
 
 type Handler struct {
-	service *service.Service
+	service    *service.Service
+	authClient *grpc.Client
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{service: services} 
+func NewHandler(services *service.Service, authClient *grpc.Client) *Handler {
+	return &Handler{
+		service:    services,
+		authClient: authClient,
+	}
 }
 
 func (h Handler) InitRoutes() *gin.Engine {
@@ -38,13 +43,12 @@ func (h Handler) InitRoutes() *gin.Engine {
 			{
 				items.POST("/", h.createItem)
 				items.GET("/", h.getAllItems)
-				items.PUT("/:item_id", h.updateItem) 
+				items.PUT("/:item_id", h.updateItem)
 				items.GET("/:item_id", h.getItemById)
 				items.DELETE("/:item_id", h.deleteItem)
 			}
 		}
 
-		
 	}
 	return router
 }

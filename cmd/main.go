@@ -1,63 +1,73 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
-	//"os"
+	"github.com/3XBAT/todo-app_by_yourself/configs"
+	authgrpc "github.com/3XBAT/todo-app_by_yourself/pkg/clients/auth/grpc"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
 
-	//"net/http"
 	"github.com/3XBAT/todo-app_by_yourself"
 	handler "github.com/3XBAT/todo-app_by_yourself/pkg/handlers"
 	"github.com/3XBAT/todo-app_by_yourself/pkg/repository"
 	"github.com/3XBAT/todo-app_by_yourself/pkg/service"
 	_ "github.com/lib/pq"
-	//"github.com/subosito/gotenv"
-
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func main() {
 
-	// if err := initConfig(); err != nil {
-	// 	log.Fatalf("error initializing config : %s", err.Error())
-	// } 
-	logrus.SetFormatter(new(logrus.JSONFormatter))
+	cfg := configs.MustLoad()
+	log := slog.New(
+		slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+	)
 
-	// if err := gotenv.Load(); err != nil {
-	// 	log.Fatalf("failed loading env variables: %s", err.Error())
-	// }
+	authClient, err := authgrpc.NewClient(
+		context.Background(),
+		log,
+		cfg.Auth.Address,
+		cfg.Auth.Timeout,
+		cfg.Auth.RetriesCount,
+	)
 
-	db, err := repository.NewPostgresDB(repository.Config{ 
+	db, err := repository.NewPostgresDB(repository.Config{
 		Port:     "5432",
 		Host:     "localhost",
 		Username: "postgres",
 		DBName:   "postgres",
 		SSLMode:  "disable",
 		Password: "qwerty",
-	}) 
+	})
 
 	if err != nil {
-		log.Fatalf(fmt.Sprintf("failed to initialized db: %s", err.Error()))
+		log.Error(fmt.Sprintf("failed to initialized db: %s", err.Error()))
 	}
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
-	handler := handler.NewHandler(services)
+	handler := handler.NewHandler(services, authClient)
 
-	
 	srv := new(todo.Server)
 
-	if err := srv.Run("8000", handler.InitRoutes()); err != nil { 
-		log.Fatalf("error occured while runing the server %s", err.Error())
+	go func() {
+		if err := srv.Run("8000", handler.InitRoutes()); err != nil {
+			log.Error("error occured while runing the server %s", err.Error())
+		}
+	}()
+
+	logrus.Info("server started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	if err := srv.ShutDown(context.Background()); err != nil {
+		logrus.Errorf("error occured while shutting down server: %s", err.Error())
 	}
 
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occured while closing db: %s", err.Error())
+	}
 }
-
-func initConfig() error {
-	viper.AddConfigPath("CONFIGS") 
-	viper.SetConfigFile("config.yaml")
-	return viper.ReadInConfig()
-}
-
-// важное замечание, если перменная и папка названны одинаково, то это очень плохо, т.к. когда в коде встречается запись "имя_папки_и_переменной". то происходит конфлик имён и наш компилятор хз что делать

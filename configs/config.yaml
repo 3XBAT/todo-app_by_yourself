@@ -1,0 +1,15 @@
+port: "8000"
+
+db:
+  username: "postgres"
+  host: "localhost"
+  port: "5432"
+  dbname: "postgres"
+  sslmode: "disable"
+
+auth:
+  address: "localhost:44044"
+  timeout: 5s
+  retries_count: 3
+
+app_secret: "secret"
