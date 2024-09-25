@@ -53,8 +53,8 @@ func main() {
 	srv := new(todo.Server)
 
 	go func() {
-		if err := srv.Run("8000", handler.InitRoutes()); err != nil {
-			log.Error("error occured while runing the server %s", err.Error())
+		if err := srv.Run("8080", handler.InitRoutes()); err != nil {
+			log.Error("error occured while runing the server %s","", err.Error())
 		}
 	}()
 
