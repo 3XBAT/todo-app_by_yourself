@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -25,6 +26,7 @@ func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
 	}
 
 	err = db.Ping()
+
 	if err != nil {
 		return nil, err
 	}

@@ -28,22 +28,26 @@ func main() {
 	authClient, err := authgrpc.NewClient(
 		context.Background(),
 		log,
-		cfg.Auth.Address,
-		cfg.Auth.Timeout,
-		cfg.Auth.RetriesCount,
+		cfg.ClientConfig.Address,
+		cfg.ClientConfig.Timeout,
+		cfg.ClientConfig.RetriesCount,
 	)
+	if err != nil {
+		panic(err)
+	}
 
 	db, err := repository.NewPostgresDB(repository.Config{
-		Port:     "5432",
-		Host:     "localhost",
-		Username: "postgres",
-		DBName:   "postgres",
-		SSLMode:  "disable",
-		Password: "qwerty",
+		Port:     cfg.DBConfig.Port,
+		Host:     cfg.DBConfig.Host,
+		Username: cfg.DBConfig.Username,
+		DBName:   cfg.DBConfig.DBName,
+		SSLMode:  cfg.DBConfig.SSLMode,
+		Password: cfg.DBConfig.Password,
 	})
 
 	if err != nil {
 		log.Error(fmt.Sprintf("failed to initialized db: %s", err.Error()))
+		panic(err)
 	}
 
 	repos := repository.NewRepository(db)
@@ -54,7 +58,7 @@ func main() {
 
 	go func() {
 		if err := srv.Run("8080", handler.InitRoutes()); err != nil {
-			log.Error("error occured while runing the server %s","", err.Error())
+			log.Error("error occured while runing the server %s", "", err.Error())
 		}
 	}()
 

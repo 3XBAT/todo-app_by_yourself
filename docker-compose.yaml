@@ -1,30 +1,35 @@
-
 services:
   todo-app:
     build : ./
     command:
-    - /wait-for-postgres.sh db
     - /application # мы говорим, что надо запустить бинарь нашего приложения
     ports:
       - 8088:8088
     depends_on:
       - db
+      - auth-grpc
+    environment:
+      - DB_PASSWORD=qwerty
 
   db:
-    restart: always
+    restart: no
     image: postgres:latest
-#    volumes:
-#      - ./.database/postgres/data:var/lib/postgresql/data
     ports:
       - 5436:5432
+    environment:
+      - POSTGRES_PASSWORD=qwerty
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-grpc:
+    build:
+      context: C:\Users\xvati\GolandProjects\Auth\auth # Путь к репозиторию с gRPC-приложением
+      dockerfile: Dockerfile
+    ports:
+      - "44044:44044"
 
 
-# build ищет докер файл
-# в command мы указываем команды которые будет запущены в контейнере при его запуске
-# ports показывает на каких портах запускать контейнер, аналогичено как в команде docker run
-# depends_on, если указанные тут контейнеры не запущены, то и наш тоже не запуститься, некая синхронизация
-# restart:always говорит о том,что данный контейнер будет постоянно запускаться при старте докера,или при перезагрузке нашего копа
-# в image мы передаем образ постгрес
-# volumes локальная директория, которая будет синхронизировать все файлы с директорией контейнера, здесь передана стандартная папка для всех файлов постгрес
-#
-#
+

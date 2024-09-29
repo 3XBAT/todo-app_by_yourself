@@ -6,10 +6,11 @@ db:
   port: "5432"
   dbname: "postgres"
   sslmode: "disable"
+  password: "qwerty"
 
 auth:
   address: "localhost:44044"
   timeout: 5s
   retries_count: 3
+  app_secret: "secret"
 
-app_secret: "secret"
